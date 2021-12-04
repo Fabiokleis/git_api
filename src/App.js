@@ -1,25 +1,45 @@
-import logo from './logo.svg';
 import './App.css';
+import React, {useState} from 'react';
+import Repos from './repos.js';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+export default function App() {
+    const [showE, setShowE] = useState(false);
+    const [repos, setRepos] = useState([]);
+
+    function getUserRepos(e) {
+        e.preventDefault();
+        const url = e.target.action + e.target.elements[0].value +"/repos";
+        e.target.elements[0].value = "";
+
+        fetch(url, 
+            {
+                method: 'GET'
+            }
+        ).then(res => res.json()).then(obj => {
+            if (obj.length === 0) {
+                setShowE(true);
+            } else {
+                setRepos(obj);
+                setShowE(false);
+            }
+        });
+    }
+
+    return (
+        <div className="App">
+           <div className="main-section">
+                <form method="GET" action="https://api.github.com/users/" onSubmit={(e) => getUserRepos(e)}>
+                    <input placeholder="username" required name="username" />
+                    <button className="sub-btn" type="submit">submit</button>
+                </form>
+            </div>
+            <p className={showE?"error":"hidden"}>
+                not found username!
+            </p>
+            <div className={(repos.length && !showE)?"repos":"hidden"}>
+                <Repos obj={repos} />
+            </div>
+        </div>
+      );
 }
-
-export default App;
